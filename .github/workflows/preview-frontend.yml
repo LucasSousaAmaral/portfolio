@@ -46,16 +46,16 @@ jobs:
       - name: Build estático (com basePath de preview)
         working-directory: frontend
         env:
-        NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL }}
-        BASE_PATH: ${{ env.BASE_PATH }}
-        ASSET_PREFIX: ${{ env.ASSET_PREFIX }}
+          NEXT_PUBLIC_API_BASE_URL: ${{ vars.NEXT_PUBLIC_API_BASE_URL }}
+          BASE_PATH: ${{ env.BASE_PATH }}
+          ASSET_PREFIX: ${{ env.ASSET_PREFIX }}
         run: |
-        if [ -f package-lock.json ]; then
+          if [ -f package-lock.json ]; then
             npm ci
-        else
+          else
             npm install --no-audit --no-fund
-        fi
-        npm run build   # <- apenas build. NADA de next export
+          fi
+          npm run build
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
