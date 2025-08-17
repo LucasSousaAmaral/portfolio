@@ -1,27 +1,58 @@
 using Amazon.DynamoDBv2;
 using Amazon.Lambda.AspNetCoreServer;
 using Amazon.Lambda.AspNetCoreServer.Hosting;
-using Portfolio.Api.Domain;
-using Portfolio.Api.Infra;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.AspNetCore.Mvc;
-
+using Portfolio.Api.Domain;
+using Portfolio.Api.Infra;
+using System.Text.RegularExpressions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Lambda + HTTP API
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
-builder.Services.AddCors(o => o.AddDefaultPolicy(p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
-// DynamoDB client (usa credenciais do ambiente da Lambda automaticamente)
+// CORS: restringe ao FRONT_ORIGIN (se definido). Se o API Gateway já injeta CORS, você pode remover esta seção.
+var frontOrigin = builder.Configuration["FRONT_ORIGIN"];
+builder.Services.AddCors(o =>
+{
+    o.AddDefaultPolicy(p =>
+    {
+        if (!string.IsNullOrWhiteSpace(frontOrigin))
+            p.WithOrigins(frontOrigin).AllowAnyHeader().AllowAnyMethod();
+        else
+            p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod(); // fallback
+    });
+});
+
+// AWS clients (creds/region herdados do ambiente da Lambda)
 builder.Services.AddSingleton<IAmazonDynamoDB>(_ => new AmazonDynamoDBClient());
-builder.Services.AddSingleton<ProjectsRepository>();
-
 builder.Services.AddSingleton<IAmazonS3>(_ => new AmazonS3Client());
+
+// Repositórios
+builder.Services.AddSingleton<ProjectsRepository>();
 
 var app = builder.Build();
 app.UseCors();
 
+// Hardening: bloqueia escritas quando ALLOW_WRITES=false (default false)
+app.Use(async (ctx, next) =>
+{
+    var allowWrites = app.Configuration.GetValue("ALLOW_WRITES", false);
+    if (!allowWrites && (HttpMethods.IsPost(ctx.Request.Method)
+                      || HttpMethods.IsPut(ctx.Request.Method)
+                      || HttpMethods.IsPatch(ctx.Request.Method)
+                      || HttpMethods.IsDelete(ctx.Request.Method)))
+    {
+        ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+        await ctx.Response.WriteAsync("writes disabled");
+        return;
+    }
+    await next();
+});
+
+// Health
 app.MapGet("/health", () => Results.Ok(new { status = "ok", ts = DateTimeOffset.UtcNow }));
 
 // ---- Projects API ----
@@ -70,31 +101,37 @@ app.MapDelete("/api/v1/projects/{id}", async (string id, ProjectsRepository repo
     return Results.NoContent();
 });
 
+// ---- Upload Presigned URL (com whitelist de MIME e flag) ----
 app.MapPost("/api/v1/uploads/presign", async (
     [FromServices] IAmazonS3 s3,
-    [FromBody] PresignRequest req
+    [FromBody] PresignRequest req,
+    IConfiguration cfg
 ) =>
 {
+    // Feature flag: desligado por padrão em produção
+    if (!cfg.GetValue("ALLOW_PRESIGN", false))
+        return Results.StatusCode(StatusCodes.Status403Forbidden);
+
     var bucket = Environment.GetEnvironmentVariable("ASSETS_BUCKET");
     if (string.IsNullOrWhiteSpace(bucket))
         return Results.Problem("ASSETS_BUCKET not configured", statusCode: 500);
 
-    // folder seguro (sem // ou ../)
+    // Whitelist de content-type (somente imagens comuns)
+    string[] allowed = { "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif" };
+    var contentType = req.ContentType?.ToLowerInvariant();
+    if (string.IsNullOrWhiteSpace(contentType) || !allowed.Contains(contentType))
+        return Results.StatusCode(StatusCodes.Status415UnsupportedMediaType);
+
+    // folder seguro (sem // ou ../) e catálogo controlado
     var folder = string.IsNullOrWhiteSpace(req.Folder) ? "projects" : SanitizeFolder(req.Folder);
 
-    // tenta a extensão via fileName; se não, a partir do contentType
-    var ext = GetExtensionFromFileName(req.FileName) ?? GuessExtension(req.ContentType) ?? string.Empty;
+    // baseName “slugado”; se vazio, GUID
+    var baseName = Slug(Path.GetFileNameWithoutExtension(req.FileName)) ?? Guid.NewGuid().ToString("N");
 
-    // se veio um nome, reaproveita; senão gera um guid
-    var baseName = string.IsNullOrWhiteSpace(req.FileName)
-        ? Guid.NewGuid().ToString("N")
-        : System.IO.Path.GetFileNameWithoutExtension(req.FileName).Trim();
+    // extensão: prioriza do filename, fallback por content-type
+    var ext = GetExtensionFromFileName(req.FileName) ?? GuessExtension(contentType) ?? string.Empty;
 
     var key = $"{folder}/{baseName}-{Guid.NewGuid():N}{ext}";
-
-    var contentType = string.IsNullOrWhiteSpace(req.ContentType)
-        ? "application/octet-stream"
-        : req.ContentType;
 
     var pre = new GetPreSignedUrlRequest
     {
@@ -103,22 +140,24 @@ app.MapPost("/api/v1/uploads/presign", async (
         Verb = HttpVerb.PUT,
         Expires = DateTime.UtcNow.AddMinutes(10),
         ContentType = contentType
+        // Se adicionar cabeçalhos aqui, o cliente deve enviá-los idênticos no PUT
     };
 
     var uploadUrl = s3.GetPreSignedURL(pre);
 
-    // dica: se o bucket for privado, esse URL público abaixo NÃO será acessível diretamente.
-    // use-o só para gravar no seu objeto "image" do projeto se você pretender servir via CloudFront depois.
-    var publicUrl = $"https://{bucket}.s3.amazonaws.com/{key}";
+    // URL pública “bonita” opcional via CDN de assets
+    var assetsCdn = cfg["ASSETS_CDN_BASE"]; // ex.: https://cdn.seu-dominio.dev
+    var publicUrl = string.IsNullOrWhiteSpace(assetsCdn)
+        ? $"https://{bucket}.s3.amazonaws.com/{key}"
+        : $"{assetsCdn.TrimEnd('/')}/{key}";
 
     return Results.Ok(new { uploadUrl, key, url = publicUrl, contentType });
 });
 
-// helpers
+// ----------------- helpers -----------------
 static string SanitizeFolder(string folder)
 {
     var f = folder.Trim().Trim('/').Replace('\\', '/');
-    // remove .. e duplicidades simples
     while (f.Contains("//")) f = f.Replace("//", "/");
     f = f.Replace("../", "").Replace("..", "");
     return string.IsNullOrWhiteSpace(f) ? "projects" : f;
@@ -127,7 +166,7 @@ static string SanitizeFolder(string folder)
 static string? GetExtensionFromFileName(string? fileName)
 {
     if (string.IsNullOrWhiteSpace(fileName)) return null;
-    var ext = System.IO.Path.GetExtension(fileName).ToLowerInvariant();
+    var ext = Path.GetExtension(fileName).ToLowerInvariant();
     return string.IsNullOrWhiteSpace(ext) ? null : ext;
 }
 
@@ -143,5 +182,21 @@ static string? GuessExtension(string? contentType) =>
         _ => null
     };
 
+static string? Slug(string? s)
+{
+    if (string.IsNullOrWhiteSpace(s)) return null;
+    var cleaned = s.ToLowerInvariant();
+
+    foreach (var ch in Path.GetInvalidFileNameChars())
+        cleaned = cleaned.Replace(ch, '-');
+
+    cleaned = Regex.Replace(cleaned, @"[^a-z0-9\-_]+", "-");
+    cleaned = Regex.Replace(cleaned, "-{2,}", "-").Trim('-');
+
+    return string.IsNullOrWhiteSpace(cleaned) ? null : cleaned;
+}
+
 app.Run();
+
+// Para testes de integração
 public partial class Program { }
