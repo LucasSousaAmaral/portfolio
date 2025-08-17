@@ -40,6 +40,17 @@ jobs:
       - name: Install Lambda Tools
         run: dotnet tool install -g Amazon.Lambda.Tools
         
+      - name: Debug directory structure
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Directory contents:"
+          ls -la
+          echo "Backend directory contents:"
+          ls -la backend/ || echo "backend/ directory does not exist"
+          echo "Looking for project files:"
+          find . -name "*.csproj" -o -name "*.sln" | head -10
+        
       - name: Create artifacts directory
         run: mkdir -p infra/envs/dev/artifacts
         
