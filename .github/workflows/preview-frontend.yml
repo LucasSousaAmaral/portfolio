@@ -14,15 +14,29 @@ jobs:
   preview:
     runs-on: ubuntu-latest
     permissions: { id-token: write, contents: read, pull-requests: write }
-    environment: dev
+    environment: dev   # <— se o seu env for "portfolio-env", troque aqui
     env:
       PR_NUM: ${{ github.event.pull_request.number }}
       BASE_PATH: /previews/pr-${{ github.event.pull_request.number }}
       ASSET_PREFIX: /previews/pr-${{ github.event.pull_request.number }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'npm', cache-dependency-path: 'frontend/package-lock.json' }
+
+      # Setup Node COM cache se existir package-lock.json
+      - name: Setup Node (cached)
+        if: ${{ hashFiles('frontend/package-lock.json') != '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # Setup Node SEM cache (fallback)
+      - name: Setup Node (no cache)
+        if: ${{ hashFiles('frontend/package-lock.json') == '' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - name: Build estático (com basePath de preview)
         working-directory: frontend
@@ -31,7 +45,11 @@ jobs:
           BASE_PATH: ${{ env.BASE_PATH }}
           ASSET_PREFIX: ${{ env.ASSET_PREFIX }}
         run: |
-          npm ci
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --no-audit --no-fund
+          fi
           npm run build
           npm run export
 
@@ -52,7 +70,6 @@ jobs:
           if [ -n "${{ vars.CF_DOMAIN }}" ]; then
             echo "domain=${{ vars.CF_DOMAIN }}" >> $GITHUB_OUTPUT
           else
-            # tenta obter do AWS pela distribution id
             DOMAIN=$(aws cloudfront list-distributions --query "DistributionList.Items[?Id=='${{ vars.CF_DISTR_ID }}'].DomainName | [0]" --output text)
             echo "domain=https://${DOMAIN}" >> $GITHUB_OUTPUT
           fi
@@ -74,12 +91,9 @@ jobs:
     if: ${{ github.event.action == 'closed' || github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
     permissions: { id-token: write, contents: read }
-    environment: dev
+    environment: dev   # <— troque se usar "portfolio-env"
     steps:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
-      - name: Apagar prefixo do preview ao fechar PR
-        run: |
-          aws s3 rm s3://${{ vars.S3_BUCKET }}/previews/pr-${{ github.event.pull_request.number }}/ --recursive || true
+          aws-r
