@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\src",
+    "\\src\\Portfolio.Api",
+    "\\src\\Portfolio.Api\\Controllers",
+    "\\src\\Portfolio.Api\\Domain",
+    "\\src\\Portfolio.Api\\Infra"
+  ],
+  "SelectedNode": "\\src\\Portfolio.Api\\Program.cs",
+  "PreviewInSolutionExplorer": false
+}
