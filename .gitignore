@@ -416,3 +416,28 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/*.tfstate
+**/*.tfstate.backup
+**/crash.log
+**/override.tf
+**/override.tf.json
+**/*_override.tf
+**/*_override.tf.json
+infra/**/artifacts/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node / Next
+node_modules/
+.next/
+out/
+*.log
+pnpm-lock.yaml
+yarn.lock
