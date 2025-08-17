@@ -1,0 +1,42 @@
+name: Backend Deploy (main)
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-deploy.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions: { id-token: write, contents: read }
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with: { dotnet-version: '8.0.x' }
+
+      - name: Instalar Lambda Tools
+        run: dotnet tool install -g Amazon.Lambda.Tools
+
+      - name: Package Lambda
+        working-directory: backend/Portfolio.Api
+        run: |
+          dotnet restore
+          dotnet lambda package --configuration Release --framework net8.0 --output-package ../../infra/envs/dev/artifacts/portfolio-api.zip
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Update Lambda code
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ vars.LAMBDA_FUNCTION_NAME }} \
+            --zip-file fileb://infra/envs/dev/artifacts/portfolio-api.zip

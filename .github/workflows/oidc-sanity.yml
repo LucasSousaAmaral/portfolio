@@ -1,0 +1,15 @@
+name: OIDC Sanity
+on: { workflow_dispatch: {} }
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions: { id-token: write, contents: read }
+    environment: dev
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - run: aws sts get-caller-identity
+      - run: aws s3 ls s3://${{ vars.S3_BUCKET }} || true
