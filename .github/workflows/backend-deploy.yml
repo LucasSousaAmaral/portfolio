@@ -43,11 +43,17 @@ jobs:
       - name: Create artifacts directory
         run: mkdir -p infra/envs/dev/artifacts
         
-      - name: Build and package Lambda
+      - name: Restore dependencies
+        working-directory: backend/Portfolio.Api
+        run: dotnet restore
+        
+      - name: Build project
+        working-directory: backend/Portfolio.Api
+        run: dotnet build --configuration Release --no-restore
+        
+      - name: Package Lambda
         working-directory: backend/Portfolio.Api
         run: |
-          dotnet restore
-          dotnet build --configuration Release --no-restore
           dotnet lambda package \
             --configuration Release \
             --framework net8.0 \
