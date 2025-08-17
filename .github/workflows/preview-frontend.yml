@@ -14,7 +14,7 @@ jobs:
   preview:
     runs-on: ubuntu-latest
     permissions: { id-token: write, contents: read, pull-requests: write }
-    environment: dev   # <— se o seu env for "portfolio-env", troque aqui
+    environment: portfolio-env
     env:
       PR_NUM: ${{ github.event.pull_request.number }}
       BASE_PATH: /previews/pr-${{ github.event.pull_request.number }}
@@ -38,6 +38,11 @@ jobs:
         with:
           node-version: 20
 
+      - name: Echo envs (debug)
+        run: |
+          echo "API=${{ vars.NEXT_PUBLIC_API_BASE_URL }}"
+          echo "BASE_PATH=${{ env.BASE_PATH }}"
+
       - name: Build estático (com basePath de preview)
         working-directory: frontend
         env:
@@ -51,7 +56,7 @@ jobs:
             npm install --no-audit --no-fund
           fi
           npm run build
-          npm run export
+          npx next export
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -91,9 +96,12 @@ jobs:
     if: ${{ github.event.action == 'closed' || github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
     permissions: { id-token: write, contents: read }
-    environment: dev   # <— troque se usar "portfolio-env"
+    environment: portfolio-env
     steps:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-r
+          aws-region: ${{ vars.AWS_REGION }}
+      - name: Apagar prefixo do preview ao fechar PR
+        run: |
+          aws s3 rm s3://${{ vars.S3_BUCKET }}/previews/pr-${{ github.event.pull_request.number }}/ --recursive || true

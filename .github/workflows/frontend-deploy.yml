@@ -14,7 +14,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions: { id-token: write, contents: read }
-    environment: dev   # <— troque se usar "portfolio-env"
+    environment: portfolio-env
     steps:
       - uses: actions/checkout@v4
 
@@ -34,6 +34,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Echo envs (debug)
+        run: echo "API=${{ vars.NEXT_PUBLIC_API_BASE_URL }}"
+
       - name: Build estático (root)
         working-directory: frontend
         env:
@@ -45,7 +48,7 @@ jobs:
             npm install --no-audit --no-fund
           fi
           npm run build
-          npm run export
+          npx next export
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
