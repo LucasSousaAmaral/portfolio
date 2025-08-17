@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
+const basePath = process.env.BASE_PATH ?? '';
+const assetPrefix = process.env.ASSET_PREFIX ?? '';
 const nextConfig = {
-  output: "export", // 👈 força Next a gerar build estático em /out
-
+  output: 'export',
+  basePath,
+  assetPrefix,
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '*.amazonaws.com' },
@@ -9,5 +12,4 @@ const nextConfig = {
     ],
   },
 };
-
 export default nextConfig;

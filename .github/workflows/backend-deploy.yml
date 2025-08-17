@@ -1,4 +1,5 @@
 name: Backend Deploy (main)
+
 on:
   push:
     branches: [ main ]
@@ -13,30 +14,83 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions: { id-token: write, contents: read }
+    permissions: 
+      id-token: write
+      contents: read
     environment: dev
+    timeout-minutes: 15
+    
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-dotnet@v4
-        with: { dotnet-version: '8.0.x' }
-
-      - name: Instalar Lambda Tools
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with: 
+          dotnet-version: '8.0.x'
+          
+      - name: Cache .NET packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+            
+      - name: Install Lambda Tools
         run: dotnet tool install -g Amazon.Lambda.Tools
-
-      - name: Package Lambda
+        
+      - name: Create artifacts directory
+        run: mkdir -p infra/envs/dev/artifacts
+        
+      - name: Build and package Lambda
         working-directory: backend/Portfolio.Api
         run: |
           dotnet restore
-          dotnet lambda package --configuration Release --framework net8.0 --output-package ../../infra/envs/dev/artifacts/portfolio-api.zip
-
-      - uses: aws-actions/configure-aws-credentials@v4
+          dotnet build --configuration Release --no-restore
+          dotnet lambda package \
+            --configuration Release \
+            --framework net8.0 \
+            --output-package ../../infra/envs/dev/artifacts/portfolio-api.zip
+            
+      - name: Verify package exists
+        run: |
+          if [ ! -f "infra/envs/dev/artifacts/portfolio-api.zip" ]; then
+            echo "Package not found!"
+            exit 1
+          fi
+          echo "Package size: $(du -h infra/envs/dev/artifacts/portfolio-api.zip)"
+          
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
-
-      - name: Update Lambda code
+          
+      - name: Update Lambda function
         run: |
+          echo "Updating Lambda function: ${{ vars.LAMBDA_FUNCTION_NAME }}"
           aws lambda update-function-code \
             --function-name ${{ vars.LAMBDA_FUNCTION_NAME }} \
-            --zip-file fileb://infra/envs/dev/artifacts/portfolio-api.zip
+            --zip-file fileb://infra/envs/dev/artifacts/portfolio-api.zip \
+            --no-cli-pager
+            
+      - name: Wait for function update
+        run: |
+          aws lambda wait function-updated \
+            --function-name ${{ vars.LAMBDA_FUNCTION_NAME }}
+            
+      - name: Verify deployment
+        run: |
+          FUNCTION_STATUS=$(aws lambda get-function \
+            --function-name ${{ vars.LAMBDA_FUNCTION_NAME }} \
+            --query 'Configuration.State' \
+            --output text)
+          echo "Function status: $FUNCTION_STATUS"
+          
+          if [ "$FUNCTION_STATUS" != "Active" ]; then
+            echo "Deployment failed - function not active"
+            exit 1
+          fi
+          
+          echo "✅ Deployment successful!"
