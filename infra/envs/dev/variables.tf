@@ -26,3 +26,15 @@ variable "assets_bucket_name" {
   description = "Nome do bucket S3 de assets (opcional)"
   default     = ""
 }
+
+
+variable "domain" {
+  description = "Domínio raiz do site"
+  type        = string
+}
+
+variable "enable_noindex" {
+  description = "Se true, envia X-Robots-Tag: noindex,nofollow"
+  type        = bool
+  default     = true
+}

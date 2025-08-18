@@ -7,20 +7,20 @@
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\Portfolio.Api\\Program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Pichau\\Desktop\\portfolio\\backend\\Portfolio.Api\\src\\Portfolio.Api\\Portfolio.Api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\Portfolio.Api\\Portfolio.Api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Pichau\\Desktop\\portfolio\\backend\\Portfolio.Api\\src\\Portfolio.Api\\Infra\\ProjectsRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\Portfolio.Api\\Infra\\ProjectsRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Pichau\\Desktop\\portfolio\\backend\\Portfolio.Api\\src\\Portfolio.Api\\Domain\\PresignRequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\Portfolio.Api\\Domain\\PresignRequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Pichau\\Desktop\\portfolio\\backend\\Portfolio.Api\\src\\Portfolio.Api\\Domain\\Project.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\Portfolio.Api\\Domain\\Project.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Pichau\\Desktop\\portfolio\\backend\\Portfolio.Api\\src\\Portfolio.Api\\Portfolio.Api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\Portfolio.Api\\Portfolio.Api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Pichau\\Desktop\\portfolio\\backend\\Portfolio.Api\\src\\Portfolio.Api\\Infra\\ProjectsRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:src\\Portfolio.Api\\Infra\\ProjectsRepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -66,7 +66,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 1,
               "Title": "PresignRequest.cs",
               "DocumentMoniker": "C:\\Users\\Pichau\\Desktop\\portfolio\\backend\\Portfolio.Api\\src\\Portfolio.Api\\Domain\\PresignRequest.cs",
               "RelativeDocumentMoniker": "src\\Portfolio.Api\\Domain\\PresignRequest.cs",
@@ -79,7 +79,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "Portfolio.Api.csproj",
               "DocumentMoniker": "C:\\Users\\Pichau\\Desktop\\portfolio\\backend\\Portfolio.Api\\src\\Portfolio.Api\\Portfolio.Api.csproj",
               "RelativeDocumentMoniker": "src\\Portfolio.Api\\Portfolio.Api.csproj",
@@ -87,12 +87,11 @@
               "RelativeToolTip": "src\\Portfolio.Api\\Portfolio.Api.csproj",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAHAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-08-16T23:45:06.286Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-16T23:45:06.286Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "ProjectsRepository.cs",
               "DocumentMoniker": "C:\\Users\\Pichau\\Desktop\\portfolio\\backend\\Portfolio.Api\\src\\Portfolio.Api\\Infra\\ProjectsRepository.cs",
               "RelativeDocumentMoniker": "src\\Portfolio.Api\\Infra\\ProjectsRepository.cs",
@@ -100,12 +99,11 @@
               "RelativeToolTip": "src\\Portfolio.Api\\Infra\\ProjectsRepository.cs",
               "ViewState": "AgIAAMgAAAAAAAAAAAAAAAYAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-16T23:35:08.144Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-16T23:35:08.144Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 2,
               "Title": "Project.cs",
               "DocumentMoniker": "C:\\Users\\Pichau\\Desktop\\portfolio\\backend\\Portfolio.Api\\src\\Portfolio.Api\\Domain\\Project.cs",
               "RelativeDocumentMoniker": "src\\Portfolio.Api\\Domain\\Project.cs",
@@ -113,8 +111,7 @@
               "RelativeToolTip": "src\\Portfolio.Api\\Domain\\Project.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-16T23:34:33.558Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-16T23:34:33.558Z"
             },
             {
               "$type": "Document",
@@ -124,7 +121,7 @@
               "RelativeDocumentMoniker": "src\\Portfolio.Api\\Program.cs",
               "ToolTip": "C:\\Users\\Pichau\\Desktop\\portfolio\\backend\\Portfolio.Api\\src\\Portfolio.Api\\Program.cs",
               "RelativeToolTip": "src\\Portfolio.Api\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAABcAAAAAzczMzEwewCwAAABAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-16T22:55:28.019Z",
               "EditorCaption": ""
