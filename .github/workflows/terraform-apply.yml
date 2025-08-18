@@ -14,7 +14,7 @@ concurrency:
 jobs:
   apply:
     runs-on: ubuntu-latest
-    environment: dev  # configure required reviewers no GitHub
+    environment: portfolio-env  # configure required reviewers no GitHub
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4
