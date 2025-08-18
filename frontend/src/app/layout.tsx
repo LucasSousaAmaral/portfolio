@@ -13,8 +13,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Lucas Amaral",
-  description: "Lucas Amaral Portfolio",
+  metadataBase: new URL("https://lucasamaral.tech"),
+  title: "Lucas Amaral — .NET & AWS",
+  description: "Backend .NET 8 em AWS: APIs rápidas, estáveis e baratas.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    url: "https://lucasamaral.tech",
+    title: "Lucas Amaral — .NET & AWS",
+    description: "APIs .NET 8, Lambda, DynamoDB e CI/CD.",
+    images: ["/og-image.png"], // 1200x630 em /public
+  },
+  twitter: { card: "summary_large_image" }
 };
 
 export default function RootLayout({
