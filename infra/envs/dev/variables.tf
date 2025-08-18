@@ -29,7 +29,7 @@ variable "assets_bucket_name" {
 
 
 variable "domain" {
-  description = "Domínio raiz do site"
+  description = "Domain raiz do site"
   type        = string
 }
 
